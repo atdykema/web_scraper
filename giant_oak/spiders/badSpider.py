@@ -28,45 +28,26 @@ class badSpider(scrapy.Spider):
 
 
     def parse_link(self, response):
-        a1 = response.xpath('//*[@id="content"]/div/div[3]/div[1]/h2/text()').extract_first()
-        a = a1[5:-3]
-        yield {
-            'name': a
-        }
-        span_num = 0
-        for span_object in response.xpath('//*[@id="content"]/div/div[3]/div[5]/div[1]/span'):
-            span_num += 1
-            entity_name = span_object.xpath(f'//*[@id="content"]/div/div[3]/div[5]/div[1]/span[{span_num}]/text()').extract_first()
-            if entity_name is None:
-                break
-            span_num += 1
-            entity_body = span_object.xpath(f'//*[@id="content"]/div/div[3]/div[5]/div[1]/span[{span_num}]/text()').extract_first()
-            yield {
-                entity_name: entity_body
-            }
+        profile = ProfileItem()
+        person = dict()
+        unclean_name = response.xpath('//*[@id="content"]/div/div[3]/div[1]/h2/text()').extract_first()
+        name = unclean_name[5:-3]
+        person['name'] = name
 
-        span_num = 0
-        for span_object in response.xpath('//*[@id="content"]/div/div[3]/div[5]/div[2]/span'):
-            span_num += 1
-            entity_name = span_object.xpath(f'//*[@id="content"]/div/div[3]/div[5]/div[2]/span[{span_num}]/text()').extract_first()
-            if entity_name is None:
-                break
-            span_num += 1
-            entity_body = span_object.xpath(f'//*[@id="content"]/div/div[3]/div[5]/div[2]/span[{span_num}]/text()').extract_first()
-            yield {
-                entity_name: entity_body
-            }
-        span_num = 0
-        for span_object in response.xpath('//*[@id="content"]/div/div[3]/div[5]/div[3]/span'):
-            span_num += 1
-            entity_name = span_object.xpath(f'//*[@id="content"]/div/div[3]/div[5]/div[3]/span[{span_num}]/text()').extract_first()
-            if entity_name is None:
-                break
-            span_num += 1
-            entity_body = span_object.xpath(f'//*[@id="content"]/div/div[3]/div[5]/div[3]/span[{span_num}]/text()').extract_first()
-            yield {
-                entity_name: entity_body
-            }
+        div_num = 0
+        for div_object in response.xpath('//*[@id="content"]/div/div[3]/div[5]/div'):
+            div_num += 1
+            span_num = 0
+            for span_object in response.xpath(f'//*[@id="content"]/div/div[3]/div[5]/div[{div_num}]/span'):
+                span_num += 1
+                entity_name = span_object.xpath(f'//*[@id="content"]/div/div[3]/div[5]/div[1]/span[{span_num}]/text()').extract_first()
+                if entity_name is None:
+                    break
+                span_num += 1
+                entity_body = span_object.xpath(f'//*[@id="content"]/div/div[3]/div[5]/div[1]/span[{span_num}]/text()').extract_first()
+                person[f"{entity_name}"] = entity_body
+        profile['person'] = person
+        yield profile
 
 
 
