@@ -47,13 +47,18 @@ class badSpider(scrapy.Spider):
         #Since there is always a name, we grab it first and get rid of the HTML tags and create a name mapping
         #in the profile dictionary
         unclean_name = response.xpath('//*[@id="content"]/div/div[3]/div[1]/h2/text()').extract_first()
-        name = unclean_name[5:-3]
-        person['name'] = name
+        split_name = unclean_name[5:-3].split()
+        first_name = split_name[0]
+        last_name = split_name[1]
+        person['First name'] = first_name
+        person['Last name'] = last_name
 
         div_num = 1
         span_num = 0
 
-        #There are three divs in each profile, with variable amounts of spans which contain data
+        about = dict()
+
+        # There are three divs in each profile, with variable amounts of spans which contain data
         while div_num < 4:
             for span_object in response.xpath(f'//*[@id="content"]/div/div[3]/div[5]/div'):
                 span_num += 1
@@ -68,11 +73,12 @@ class badSpider(scrapy.Spider):
 
                 #Grab partner span which contains the data relating to the identity
                 entity_body = span_object.xpath(f'//*[@id="content"]/div/div[3]/div[5]/div[{div_num}]/span[{span_num}]/text()').extract_first()
-                person[f"{entity_name}"] = entity_body
+                about[f"{entity_name}"] = entity_body
             span_num = 0
             div_num += 1
 
         #Set JSON object equal to person dictionary containing individual information
+        person['about'] = about
         profile['person'] = person
 
         #Return criminals profile in JSON to data.json
